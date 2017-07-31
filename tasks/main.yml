@@ -17,15 +17,9 @@
   yum:
     name: elasticsearch
     state: latest
-- name: change JVM Xms
-  lineinfile: dest=/etc/elasticsearch/jvm.options state=present regexp='-Xms2g' line='-Xms1g' backrefs=yes
-  notify: "notify elasticsearch for restart"
-- name: change JVM Xms
-  lineinfile: dest=/etc/elasticsearch/jvm.options state=present regexp='-Xmx2g' line='-Xmx1g' backrefs=yes
-  notify: "notify elasticsearch for restart"
 - name: allow local network connections
   lineinfile: 
     dest: /etc/elasticsearch/elasticsearch.yml
     state: present 
-    line: 'http.host: "{{ ansible_default_ipv4.address }}"'
+    line: 'network.host: ["{{ ansible_default_ipv4.address }}", "localhost"]'
   notify: "notify elasticsearch for restart"
