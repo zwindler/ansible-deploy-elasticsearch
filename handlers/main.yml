@@ -1,3 +1,6 @@
 ---
 - name: "notify elasticsearch for restart"
-  service: name=elasticsearch state=restarted enabled=yes
+  systemd: 
+    name: elasticsearch 
+    state: restarted
+    enabled: yes

@@ -1,25 +1,37 @@
 ---
-- name: Add Elasticsearch repository
-  yum_repository:
-    name: elasticsearch-5.x
-    description: Elasticsearch repository for 5.x packages
-    baseurl: https://artifacts.elastic.co/packages/5.x/yum
-    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-- name: Add Elasticsearch key to keystore
-  rpm_key:
-    state: present
-    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-- name: Install java
-  yum: 
-    name: java
+- name: "Install prerequisites"
+  apt: 
+    name: "{{item}}"
     state: latest
-- name: Install Elasticsearch 
-  yum:
+  loop:
+    - apt-transport-https
+- name: "Add Elasticstack repository key"
+  apt_key:
+    url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+    state: present
+- name: "Add Elasticstack repository"
+  apt_repository:
+    repo: "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+    state: present
+- name: "Install Elasticsearch"
+  apt:
     name: elasticsearch
     state: latest
-- name: allow local network connections
+  notify: "notify elasticsearch for restart"
+- name: "Tune sysctl vm.max_map_count and reload"
+  sysctl:
+    name: vm.max_map_count
+    value: 262144
+    state: present
+- name: "Allow local network connections"
   lineinfile: 
     dest: /etc/elasticsearch/elasticsearch.yml
     state: present 
     line: 'network.host: ["{{ ansible_default_ipv4.address }}", "localhost"]'
+  notify: "notify elasticsearch for restart"
+- name: "Allow local network connections part 2"
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    state: present
+    line: 'discovery.seed_hosts: []'
   notify: "notify elasticsearch for restart"
