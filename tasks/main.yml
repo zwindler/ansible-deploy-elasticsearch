@@ -33,5 +33,11 @@
   lineinfile:
     dest: /etc/elasticsearch/elasticsearch.yml
     state: present
-    line: 'discovery.seed_hosts: []'
+    line: 'discovery.type: single-node'
+  notify: "notify elasticsearch for restart"
+- name: "Enable X-Pack security features"
+  lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    state: present
+    line: "xpack.security.enabled: true"
   notify: "notify elasticsearch for restart"
